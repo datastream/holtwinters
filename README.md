@@ -1,11 +1,9 @@
 # Holt-Winters Triple Exponential Smoothing Algorithm
 
-Based on ![Ruby version](https://github.com/cmdrkeene/holt_winters)
+Based on [Ruby version](https://github.com/cmdrkeene/holt_winters)
 
 ![Algorithm](http://www.itl.nist.gov/div898/handbook/pmc/section4/eqns/ts26.gif)
 
-    The equations are intended to give more weight to recent observations and less weights to observations further in the past.
-    These weights are geometrically decreasing by a constant ratio.
 
 # Usage
 
