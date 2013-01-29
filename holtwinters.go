@@ -44,7 +44,6 @@ func Forecast(y []float64, alpha, beta, gamma float64, period, m int) (forecast 
 	return
 }
 
-
 //
 // Validate input.
 func validate_arguments(y []float64, alpha, beta, gamma float64, period, m int) (err error) {
@@ -95,7 +94,8 @@ func calculateHoltWinters(y []float64, a0, b0, alpha, beta, gamma float64, initi
 
 		// overall smoothing
 		if (i - period) >= 0 {
-			st[i] = alpha*y[i]/it[i-period] + (1.0-alpha)*(st[i-1]+bt[i-1])
+			st[i] = alpha*y[i]/it[i-period] +
+				(1.0-alpha)*(st[i-1]+bt[i-1])
 		} else {
 			st[i] = alpha*y[i] + (1.0-alpha)*(st[i-1]+bt[i-1])
 		}
@@ -110,7 +110,8 @@ func calculateHoltWinters(y []float64, a0, b0, alpha, beta, gamma float64, initi
 
 		// forecast
 		if (i + m) >= period {
-			ft[i+m] = (st[i] + (float64(m) * bt[i])) * it[i-period+m]
+			ft[i+m] = (st[i] + (float64(m) * bt[i])) *
+				it[i-period+m]
 		}
 	}
 
@@ -138,27 +139,29 @@ func initial_trend(y []float64, period int) float64 {
 // See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
 func seasonal_indicies(y []float64, period, seasons int) []float64 {
 
-	seasonal_average  := make([]float64, seasons)
+	seasonal_average := make([]float64, seasons)
 	seasonal_indices := make([]float64, period)
 
 	averaged_observations := make([]float64, len(y))
 
 	for i := 0; i < seasons; i++ {
 		for j := 0; j < period; j++ {
-			seasonal_average [i] += y[(i*period)+j]
+			seasonal_average[i] += y[(i*period)+j]
 		}
 		seasonal_average[i] /= float64(period)
 	}
 
 	for i := 0; i < seasons; i++ {
 		for j := 0; j < period; j++ {
-			averaged_observations[(i*period)+j] = y[(i*period)+j] / seasonal_average[i]
+			averaged_observations[(i*period)+j] = y[(i*period)+j] /
+				seasonal_average[i]
 		}
 	}
 
 	for i := 0; i < period; i++ {
 		for j := 0; j < seasons; j++ {
-			seasonal_indices[i] += averaged_observations[(j*period)+i]
+			seasonal_indices[i] +=
+				averaged_observations[(j*period)+i]
 		}
 		seasonal_indices[i] /= float64(seasons)
 	}
