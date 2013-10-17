@@ -1,4 +1,4 @@
-package holtwinters
+package holtwinters_test
 
 import (
 	"../holtwinters"

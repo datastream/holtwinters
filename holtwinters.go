@@ -1,15 +1,15 @@
+// Package holtwinters import http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
 // st[i] = alpha * y[i] / it[i - period] + (1.0 - alpha) * (st[i - 1] + bt[i - 1])
 // bt[i] = gamma * (st[i] - st[i - 1]) + (1 - gamma) * bt[i - 1]
 // it[i] = beta * y[i] / st[i] + (1.0 - beta) * it[i - period]
 // ft[i + m] = (st[i] + (m * bt[i])) * it[i - period + m]
-// http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
 package holtwinters
 
 import (
 	"errors"
 )
 
-// This method is the entry point. it calculates the initial values and
+// Forecast method is the entry point. it calculates the initial values and
 // returns the forecast for the future m periods.
 //
 // y - Time series data.
@@ -29,15 +29,15 @@ import (
 //   - 12 monthly
 func Forecast(y []float64, alpha, beta, gamma float64, period, m int) (forecast []float64, err error) {
 
-	if err = validate_arguments(y, alpha, beta, gamma, period, m); err != nil {
+	if err = validateArguments(y, alpha, beta, gamma, period, m); err != nil {
 		forecast = nil
 		return
 	}
 
 	seasons := len(y) / period
-	a0 := initial_level(y)
-	b0 := initial_trend(y, period)
-	seasonal := seasonal_indicies(y, period, seasons)
+	a0 := initialLevel(y)
+	b0 := initialTrend(y, period)
+	seasonal := seasonalIndicies(y, period, seasons)
 
 	forecast = calculateHoltWinters(y, a0, b0, alpha, beta, gamma, seasonal, period, m)
 
@@ -46,30 +46,30 @@ func Forecast(y []float64, alpha, beta, gamma float64, period, m int) (forecast 
 
 //
 // Validate input.
-func validate_arguments(y []float64, alpha, beta, gamma float64, period, m int) (err error) {
+func validateArguments(y []float64, alpha, beta, gamma float64, period, m int) (err error) {
 
 	if len(y) == 0 {
-		err = errors.New("Value of y should be not null")
+		err = errors.New("value of y should be not null")
 	}
 
 	if m <= 0 {
-		err = errors.New("Value of m must be greater than 0.")
+		err = errors.New("value of m must be greater than 0")
 	}
 
 	if m > period {
-		err = errors.New("Value of m must be <= period.")
+		err = errors.New("value of m must be <= period")
 	}
 
 	if (alpha < 0.0) || (alpha > 1.0) {
-		err = errors.New("Value of Alpha should satisfy 0.0 <= alpha <= 1.0")
+		err = errors.New("value of Alpha should satisfy 0.0 <= alpha <= 1.0")
 	}
 
 	if (beta < 0.0) || (beta > 1.0) {
-		err = errors.New("Value of Beta should satisfy 0.0 <= beta <= 1.0")
+		err = errors.New("value of Beta should satisfy 0.0 <= beta <= 1.0")
 	}
 
 	if (gamma < 0.0) || (gamma > 1.0) {
-		err = errors.New("Value of Gamma should satisfy 0.0 <= gamma <= 1.0")
+		err = errors.New("value of Gamma should satisfy 0.0 <= gamma <= 1.0")
 	}
 	return
 }
@@ -94,8 +94,7 @@ func calculateHoltWinters(y []float64, a0, b0, alpha, beta, gamma float64, initi
 
 		// overall smoothing
 		if (i - period) >= 0 {
-			st[i] = alpha*y[i]/it[i-period] +
-				(1.0-alpha)*(st[i-1]+bt[i-1])
+			st[i] = alpha*y[i]/it[i-period] + (1.0-alpha)*(st[i-1]+bt[i-1])
 		} else {
 			st[i] = alpha*y[i] + (1.0-alpha)*(st[i-1]+bt[i-1])
 		}
@@ -110,8 +109,7 @@ func calculateHoltWinters(y []float64, a0, b0, alpha, beta, gamma float64, initi
 
 		// forecast
 		if (i + m) >= period {
-			ft[i+m] = (st[i] + (float64(m) * bt[i])) *
-				it[i-period+m]
+			ft[i+m] = (st[i] + (float64(m) * bt[i])) * it[i-period+m]
 		}
 	}
 
@@ -119,12 +117,12 @@ func calculateHoltWinters(y []float64, a0, b0, alpha, beta, gamma float64, initi
 }
 
 // See: http://robjhyndman.com/researchtips/hw-initialization/
-func initial_level(y []float64) float64 {
+func initialLevel(y []float64) float64 {
 	return y[0]
 }
 
 // See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-func initial_trend(y []float64, period int) float64 {
+func initialTrend(y []float64, period int) float64 {
 
 	var sum float64
 	sum = 0
@@ -137,34 +135,32 @@ func initial_trend(y []float64, period int) float64 {
 }
 
 // See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-func seasonal_indicies(y []float64, period, seasons int) []float64 {
+func seasonalIndicies(y []float64, period, seasons int) []float64 {
 
-	seasonal_average := make([]float64, seasons)
-	seasonal_indices := make([]float64, period)
+	seasonalAverage := make([]float64, seasons)
+	seasonalIndices := make([]float64, period)
 
-	averaged_observations := make([]float64, len(y))
+	averagedObservations := make([]float64, len(y))
 
 	for i := 0; i < seasons; i++ {
 		for j := 0; j < period; j++ {
-			seasonal_average[i] += y[(i*period)+j]
+			seasonalAverage[i] += y[(i*period)+j]
 		}
-		seasonal_average[i] /= float64(period)
+		seasonalAverage[i] /= float64(period)
 	}
 
 	for i := 0; i < seasons; i++ {
 		for j := 0; j < period; j++ {
-			averaged_observations[(i*period)+j] = y[(i*period)+j] /
-				seasonal_average[i]
+			averagedObservations[(i*period)+j] = y[(i*period)+j] / seasonalAverage[i]
 		}
 	}
 
 	for i := 0; i < period; i++ {
 		for j := 0; j < seasons; j++ {
-			seasonal_indices[i] +=
-				averaged_observations[(j*period)+i]
+			seasonalIndices[i] += averagedObservations[(j*period)+i]
 		}
-		seasonal_indices[i] /= float64(seasons)
+		seasonalIndices[i] /= float64(seasons)
 	}
 
-	return seasonal_indices
+	return seasonalIndices
 }
