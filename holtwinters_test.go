@@ -1,7 +1,6 @@
-package holtwinters_test
+package holtwinters
 
 import (
-	"../holtwinters"
 	"testing"
 )
 
@@ -16,7 +15,7 @@ func TestHoltwinters(t *testing.T) {
 	beta := 0.4
 	gamma := 0.6
 
-	prediction, _ := holtwinters.Forecast(y[:], alpha, beta,
+	prediction, _ := Forecast(y[:], alpha, beta,
 		gamma, period, m)
 	expected := [...]float64{0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 		594.8043646513713, 357.12171044215734, 410.9203094983815,
